@@ -1346,8 +1346,8 @@ print(np.nanmean(baselines_token_agr))
 
 baselines_span_agr = []
 for i in range(1000):
-    list_a = [1] * 23 + [0] * 67
-    list_b = [1] * 23 + [0] * 67
+    list_a = [1] * 23 + [0] * 77
+    list_b = [1] * 23 + [0] * 77
     random.shuffle(list_a)
     random.shuffle(list_b)
     baselines_span_agr.append(get_instance_baseline_agr_score(list_a,list_b))
