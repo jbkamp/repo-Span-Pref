@@ -28,7 +28,6 @@ Analysis script:
 * `flair 0.12.2`
 
 ### Cite us :)
-### Cite us :)
 Please cite our LREC-Coling version:
 ```bibtex
 @inproceedings{kamp-etal-2024-role-syntactic,
