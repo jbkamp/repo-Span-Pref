@@ -62,11 +62,8 @@ dataset = {"train":Dataset.from_list([{"text":Xi,"label":yi} for (Xi,yi) in trai
            "dev":Dataset.from_list([{"text":Xi,"label":yi} for (Xi,yi) in dev]),
            "test":Dataset.from_list([{"text":Xi,"label":yi} for (Xi,yi) in test])}
 
-# load tokenizer + start EVAL part: load previously trained model
 tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-
-run_name = "kk1t84xd_lilac-rain-19"
-model = DistilBertForSequenceClassification.from_pretrained("./runs/results/"+run_name,num_labels=3)
+model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased",num_labels=3)
 
 try:
     device = 'mps' if torch.has_mps else 'cpu' #m1 mac
@@ -75,8 +72,6 @@ except AttributeError:
 print(device)
 
 model = model.to(device)
-model.eval()
-model.zero_grad()
 
 def tokenize_function(examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=MAX_LEN) # setting padding to `longest` did not work.
@@ -140,4 +135,27 @@ trainer = Trainer(
     eval_dataset = dataset_tensored["test"],
 )
 
+# INITIATE WANDB PROJECT
+wandb.init(project="wandb_proj_ESNLI")
+
+trainer.train()
 trainer.evaluate()
+
+## Saving model locally: https://pytorch.org/tutorials/beginner/saving_loading_models.html
+results_path = './runs/results/'
+run_name = wandb.run.name #human-readible name as given on wandb dashboard
+run_id = wandb.run.id #id as given in wandb run subdirs
+out_path = os.path.join(results_path, "{}_{}".format(run_id, run_name))
+os.mkdir(out_path)
+print("{} created".format(out_path))
+trainer.save_model(out_path)
+
+## Saving the data_original splits
+data_path = os.path.join(out_path, "data_original/")
+os.mkdir(data_path)
+with open(data_path + "train.json", "w") as outfile:
+    json.dump(dict(train), outfile)
+with open(data_path + "dev.json", "w") as outfile:
+    json.dump(dict(dev), outfile)
+with open(data_path + "test.json", "w") as outfile:
+    json.dump(dict(test), outfile)
